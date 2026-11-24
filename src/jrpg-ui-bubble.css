@@ -9,6 +9,7 @@
   --jrpg-pad-y: calc(var(--jrpg-u) * 3);
   --jrpg-gap: calc(var(--jrpg-u) * 3); /* bubble distance from the anchor = tail height */
   --jrpg-bubble-max: 420px;
+  --jrpg-text-max: calc(var(--jrpg-u) * 35); /* ~5 lines; longer text scrolls */
 }
 
 /* ── Bubble ────────────────────────────────────────────────────────── */
@@ -47,8 +48,20 @@
 }
 
 .jrpg-text {
+  max-height: var(--jrpg-text-max);
+  overflow-y: auto;
+  overscroll-behavior: contain; /* do not scroll the page/game behind the bubble */
   white-space: pre-wrap; /* \n in text = new line */
   overflow-wrap: break-word;
+  scrollbar-width: none; /* the "next" arrow is the scroll hint instead */
+}
+.jrpg-text::-webkit-scrollbar {
+  display: none;
+}
+
+/* Only when the text actually overflows (set by JS): let the player scroll it. */
+.jrpg-bubble.jrpg-scroll .jrpg-text {
+  pointer-events: auto;
 }
 
 /* Characters: all are in the DOM from the start (stable layout), just invisible. */
@@ -101,7 +114,7 @@
   transform: scaleY(-1);
 }
 
-/* "Next" arrow (after all text is typed, when the bubble waits for input) */
+/* "Next" arrow — a scroll hint, shown only when there is text below the fold */
 .jrpg-next {
   display: none;
   position: absolute;
@@ -116,7 +129,7 @@
   );
   animation: jrpg-blink 1s linear infinite;
 }
-.jrpg-bubble.jrpg-wait .jrpg-next {
+.jrpg-bubble.jrpg-scroll .jrpg-next {
   display: block;
 }
 
@@ -135,11 +148,11 @@
 
 /*
  * CLASS CHEAT SHEET — BUBBLE
- *   .jrpg-bubble          bubble (--below, --free; states: .jrpg-done, .jrpg-wait)
+ *   .jrpg-bubble          bubble (--below, --free; states: .jrpg-done, .jrpg-wait, .jrpg-scroll)
  *     .jrpg-name            speaker name
- *     .jrpg-text            text
+ *     .jrpg-text            scrollable text (max-height: --jrpg-text-max)
  *       .jrpg-ch            single character (.jrpg-on = revealed)
  *     .jrpg-tail            tail
- *     .jrpg-next            "next" arrow
+ *     .jrpg-next            "next" arrow (scroll hint, only with .jrpg-scroll)
  *     .jrpg-sr              screen-reader text
  */

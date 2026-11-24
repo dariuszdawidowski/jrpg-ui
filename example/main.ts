@@ -13,9 +13,31 @@ function run(task: Promise<unknown>): void {
   })
 }
 
-document.querySelector('#bubble')?.addEventListener('click', () => {
+const SHORT_TEXT = 'The old lamp flickers.\nSomewhere below, a door creaks open.'
+
+const LONG_TEXT = [
+  'The old lamp flickers.',
+  'Somewhere below, a door creaks open.',
+  'You count the steps as you descend: ten, twenty, thirty —',
+  'the air grows colder with each one, and the walls press closer.',
+  'At the bottom, a corridor stretches into darkness.',
+  'A single candle burns at its far end, though no one is holding it.',
+  'You feel, more than hear, something breathing in the dark.',
+  'Then the candle goes out, and the breathing stops.',
+].join('\n')
+
+document.querySelector('#bubble-short')?.addEventListener('click', () => {
   run(
-    showBubble('The old lamp flickers.\nSomewhere below, a door creaks open.', {
+    showBubble(SHORT_TEXT, {
+      speaker: 'Narrator',
+      anchor: { x: game.clientWidth / 2, y: game.clientHeight / 2 },
+    }),
+  )
+})
+
+document.querySelector('#bubble-long')?.addEventListener('click', () => {
+  run(
+    showBubble(LONG_TEXT, {
       speaker: 'Narrator',
       anchor: { x: game.clientWidth / 2, y: game.clientHeight / 2 },
     }),

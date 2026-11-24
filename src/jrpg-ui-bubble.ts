@@ -214,6 +214,19 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   el.append(textEl, sr, tail, next)
   layer.append(el)
 
+  // The arrow is a scroll hint, so it only appears once typing is done and
+  // there is still content below the visible part of the text.
+  const isScrollable = () => textEl.scrollHeight > textEl.clientHeight + 1
+  const hasMoreBelow = () => textEl.scrollHeight - textEl.scrollTop > textEl.clientHeight + 1
+  const updateScrollState = () => {
+    el.classList.toggle('jrpg-scroll', el.classList.contains('jrpg-done') && hasMoreBelow())
+  }
+  textEl.addEventListener('scroll', updateScrollState, { passive: true })
+  // A tap on scrollable text is meant for scrolling, not for advancing the dialog.
+  textEl.addEventListener('pointerdown', (event) => {
+    if (isScrollable()) event.stopPropagation()
+  })
+
   // ── Positioning: once at startup and when the layer is resized ──
   const place = () => {
     if (!anchor) return
@@ -262,6 +275,12 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
 
     const state: BubbleState = {
       onAction(action) {
+        if (action === 'up' || action === 'down') {
+          if (typing || !isScrollable()) return false
+          textEl.scrollTop += (action === 'down' ? 1 : -1) * textEl.clientHeight * 0.8
+          updateScrollState()
+          return true
+        }
         if (action !== 'confirm') return false
         if (typing) {
           tw?.skip()
@@ -291,6 +310,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
     tw = typewrite(spans, chars, cps, settings.pauses, onChar, () => {
       typing = false
       el.classList.add('jrpg-done')
+      updateScrollState()
       if (waitForInput) {
         waiting = true
         el.classList.add('jrpg-wait')
