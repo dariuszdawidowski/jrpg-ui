@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>JRPG-UI playground</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        background: #0d0d1a;
+        color: #f5f1e6;
+        font-family: ui-monospace, monospace;
+      }
+
+      #game {
+        position: relative;
+        width: min(960px, 100vw);
+        height: min(540px, 100vh);
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 45%, #1e1e3c 0%, #101024 60%, #0a0a16 100%);
+      }
+
+      .controls {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .controls button {
+        padding: 10px 14px;
+        border: 2px solid #f5f1e6;
+        border-radius: 0;
+        background: #1a1a2e;
+        color: #f5f1e6;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .controls button:hover {
+        background: #2a2a4a;
+      }
+
+      .hint {
+        position: absolute;
+        right: 0;
+        bottom: 10px;
+        left: 0;
+        margin: 0;
+        color: #6e6e8f;
+        font-size: 12px;
+        text-align: center;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="game">
+      <div class="controls">
+        <button id="bubble" type="button">Bubble</button>
+        <button id="choices" type="button">Choices</button>
+      </div>
+      <p class="hint">Click, tap or press Enter / Space to advance</p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

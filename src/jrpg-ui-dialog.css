@@ -1,0 +1,306 @@
+/*
+ * pixel-dialog.css — domyślny motyw pixel-art
+ *
+ * JAK PODMIENIĆ STYL
+ * 1) Najprościej: nadpisz zmienne --pxd-* na .pxd-layer (lub na własnej klasie
+ *    przekazanej w configure({ theme: 'moj-motyw' })):
+ *
+ *      .pxd-layer.moj-motyw { --pxd-bg: #fff; --pxd-border: #000; --pxd-u: 3px; }
+ *
+ *    Domyślne wartości są w :where(), więc ich specyficzność wynosi 0
+ *    i każda Twoja reguła wygra, niezależnie od kolejności arkuszy.
+ *
+ * 2) Dalej: nadpisz same klasy (.pxd-bubble, .pxd-choices, .pxd-choice, ...).
+ *    Lista klas znajduje się na końcu pliku.
+ *
+ * 3) Całkiem własny wygląd: nie importuj tego pliku i napisz własny CSS
+ *    dla tych samych klas.
+ */
+
+:where(.pxd-layer) {
+  /* ── Jednostka "piksela interfejsu" ─────────────────────────────── */
+  --pxd-u: 4px; /* grubość ramki, krok schodków, bazowy odstęp */
+
+  /* ── Kolory ──────────────────────────────────────────────────────── */
+  --pxd-bg: #1a1a2e;
+  --pxd-border: #f5f1e6;
+  --pxd-text: #f5f1e6;
+  --pxd-accent: #ffd23f; /* imię mówiącego, kursor, strzałka, zaznaczenie */
+  --pxd-muted: #6e6e8f; /* opcje wyłączone */
+
+  /* ── Typografia ──────────────────────────────────────────────────── */
+  /* Fonty musisz załadować sam (@font-face). Sprawdź pokrycie polskich znaków. */
+  --pxd-font: "Press Start 2P", "Pixelify Sans", ui-monospace, monospace;
+  --pxd-font-size: 16px; /* fonty pikselowe najlepiej wyglądają przy wielokrotnościach ich siatki */
+  --pxd-line-height: 1.75;
+
+  /* ── Wymiary ─────────────────────────────────────────────────────── */
+  --pxd-pad-x: calc(var(--pxd-u) * 3);
+  --pxd-pad-y: calc(var(--pxd-u) * 3);
+  --pxd-gap: calc(var(--pxd-u) * 3); /* odstęp chmurki od kotwicy = wysokość ogonka */
+  --pxd-bubble-max: 420px;
+  --pxd-edge: calc(var(--pxd-u) * 4); /* minimalny margines od krawędzi warstwy */
+  --pxd-z: 1000;
+
+  /* Marginesy bezpieczne (notch, pasek gestów) – używane też w JS do clampowania */
+  --pxd-safe-t: max(var(--pxd-edge), env(safe-area-inset-top, 0px));
+  --pxd-safe-r: max(var(--pxd-edge), env(safe-area-inset-right, 0px));
+  --pxd-safe-b: max(var(--pxd-edge), env(safe-area-inset-bottom, 0px));
+  --pxd-safe-l: max(var(--pxd-edge), env(safe-area-inset-left, 0px));
+}
+
+/* ── Warstwa ───────────────────────────────────────────────────────── */
+
+.pxd-layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--pxd-z);
+  box-sizing: border-box;
+  padding: var(--pxd-safe-t) var(--pxd-safe-r) var(--pxd-safe-b) var(--pxd-safe-l);
+  overflow: hidden;
+  pointer-events: none; /* kliknięcia przechodzą do gry */
+
+  font-family: var(--pxd-font);
+  font-size: var(--pxd-font-size);
+  line-height: var(--pxd-line-height);
+  color: var(--pxd-text);
+
+  -webkit-font-smoothing: none; /* ostre krawędzie liter */
+  text-rendering: optimizeSpeed;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pxd-layer--fixed {
+  position: fixed; /* gdy root to <body> */
+}
+
+/* Ramka pikselowa: 4 cienie przesunięte o 1 jednostkę → ramka z "ściętymi" rogami. */
+:is(.pxd-bubble, .pxd-choices) {
+  background: var(--pxd-bg);
+  color: var(--pxd-text);
+  box-shadow:
+    0 calc(var(--pxd-u) * -1) 0 0 var(--pxd-border),
+    0 var(--pxd-u) 0 0 var(--pxd-border),
+    calc(var(--pxd-u) * -1) 0 0 0 var(--pxd-border),
+    var(--pxd-u) 0 0 0 var(--pxd-border);
+}
+
+/* ── Chmurka ───────────────────────────────────────────────────────── */
+
+.pxd-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(var(--pxd-bubble-max), calc(100% - 2 * var(--pxd-edge)));
+  margin: 0 0 var(--pxd-gap); /* margin-bottom = odstęp nad kotwicą (czyta go JS) */
+  padding: var(--pxd-pad-y) var(--pxd-pad-x);
+}
+
+/* Chmurka pod kotwicą (gdy nie mieści się nad nią) */
+.pxd-bubble--below {
+  margin: var(--pxd-gap) 0 0;
+}
+
+/* Bez kotwicy: pasek narratora na dole ekranu, bez ogonka */
+.pxd-bubble--free {
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: var(--pxd-safe-b);
+  margin: 0 auto;
+}
+.pxd-bubble--free .pxd-tail {
+  display: none;
+}
+
+.pxd-name {
+  margin-bottom: var(--pxd-u);
+  color: var(--pxd-accent);
+}
+
+.pxd-text {
+  white-space: pre-wrap; /* \n w tekście = nowa linia */
+  overflow-wrap: break-word;
+}
+
+/* Litery: wszystkie są w DOM od początku (stały layout), tylko niewidoczne. */
+.pxd-ch {
+  visibility: hidden;
+}
+.pxd-ch.pxd-on {
+  visibility: visible;
+}
+
+/* Tekst tylko dla czytników ekranu */
+.pxd-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Ogonek: schodkowy trójkąt zrobiony z cieni (rzędy 5 → 3 → 1 jednostek).
+   Element ma rozmiar 1×1 jednostki; --pxd-tail-x ustawia JS (środek ogonka). */
+.pxd-tail {
+  position: absolute;
+  top: 100%;
+  left: calc(var(--pxd-tail-x, 50%) - var(--pxd-u) / 2);
+  width: var(--pxd-u);
+  height: var(--pxd-u);
+  background: var(--pxd-bg);
+  box-shadow:
+    /* rząd 1: wypełnienie (zakrywa dolną ramkę chmurki) */
+    calc(var(--pxd-u) * -1) 0 0 0 var(--pxd-bg),
+    var(--pxd-u) 0 0 0 var(--pxd-bg),
+    /* rząd 1: kontur */
+    calc(var(--pxd-u) * -2) 0 0 0 var(--pxd-border),
+    calc(var(--pxd-u) * 2) 0 0 0 var(--pxd-border),
+    /* rząd 2 */
+    0 var(--pxd-u) 0 0 var(--pxd-bg),
+    calc(var(--pxd-u) * -1) var(--pxd-u) 0 0 var(--pxd-border),
+    var(--pxd-u) var(--pxd-u) 0 0 var(--pxd-border),
+    /* rząd 3: czubek */
+    0 calc(var(--pxd-u) * 2) 0 0 var(--pxd-border);
+}
+.pxd-bubble--below .pxd-tail {
+  top: auto;
+  bottom: 100%;
+  transform: scaleY(-1);
+}
+
+/* Strzałka "dalej" (po dopisaniu całego tekstu, gdy chmurka czeka na input) */
+.pxd-next {
+  display: none;
+  position: absolute;
+  right: calc(var(--pxd-u) * 2);
+  bottom: calc(var(--pxd-u) * 0.5);
+  width: calc(var(--pxd-u) * 5);
+  height: calc(var(--pxd-u) * 3);
+  background: var(--pxd-accent);
+  clip-path: polygon(
+    0 0, 100% 0, 100% 34%, 80% 34%, 80% 67%, 60% 67%,
+    60% 100%, 40% 100%, 40% 67%, 20% 67%, 20% 34%, 0 34%
+  );
+  animation: pxd-blink 1s linear infinite;
+}
+.pxd-bubble.pxd-wait .pxd-next {
+  display: block;
+}
+
+@keyframes pxd-blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* ── Wybór odpowiedzi ──────────────────────────────────────────────── */
+
+.pxd-choices {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  min-width: calc(var(--pxd-u) * 30);
+  max-width: calc(100% - 2 * var(--pxd-edge));
+  max-height: 100%;
+  padding: var(--pxd-u) 0;
+  pointer-events: auto; /* jedyny element warstwy, który łapie dotyk/mysz */
+}
+
+.pxd-choices--bottom-right { right: 0; bottom: 0; }
+.pxd-choices--bottom-left { left: 0; bottom: 0; }
+.pxd-choices--bottom-center { left: 0; right: 0; bottom: 0; margin: 0 auto; }
+.pxd-choices--center { inset: 0; margin: auto; height: fit-content; }
+
+/* Wewnętrzna lista przewija się, ramka zewnętrzna zostaje nietknięta */
+.pxd-list {
+  position: relative; /* potrzebne do offsetTop w JS */
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  outline: none;
+}
+.pxd-list::-webkit-scrollbar {
+  display: none;
+}
+
+.pxd-choice {
+  appearance: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(var(--pxd-u) * 11); /* ≥ 44 px pod palec przy domyślnej jednostce */
+  margin: 0;
+  padding: var(--pxd-u) var(--pxd-pad-x) var(--pxd-u) calc(var(--pxd-u) * 8);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Kursor: schodkowa strzałka w prawo, widoczna tylko przy zaznaczonej opcji */
+.pxd-choice::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--pxd-u) * 3);
+  top: 50%;
+  width: calc(var(--pxd-u) * 3);
+  height: calc(var(--pxd-u) * 5);
+  margin-top: calc(var(--pxd-u) * -2.5);
+  background: var(--pxd-accent);
+  clip-path: polygon(
+    0 0, 34% 0, 34% 20%, 67% 20%, 67% 40%, 100% 40%,
+    100% 60%, 67% 60%, 67% 80%, 34% 80%, 34% 100%, 0 100%
+  );
+  visibility: hidden;
+}
+
+.pxd-choice.pxd-selected {
+  color: var(--pxd-accent);
+}
+.pxd-choice.pxd-selected::before {
+  visibility: visible;
+}
+
+.pxd-choice.pxd-disabled {
+  color: var(--pxd-muted);
+  cursor: default;
+}
+
+/* ── Ruch ograniczony na życzenie systemu ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pxd-next {
+    animation: none;
+  }
+}
+
+/*
+ * ŚCIĄGA KLAS
+ *   .pxd-layer           warstwa nakładki (--fixed gdy root = body)
+ *   .pxd-bubble          chmurka   (--below, --free; stany: .pxd-done, .pxd-wait)
+ *     .pxd-name            imię mówiącego
+ *     .pxd-text            tekst
+ *       .pxd-ch            pojedyncza litera (.pxd-on = odsłonięta)
+ *     .pxd-tail            ogonek
+ *     .pxd-next            strzałka „dalej”
+ *     .pxd-sr              tekst dla czytników ekranu
+ *   .pxd-choices         panel wyboru (--bottom-right | --bottom-left | --bottom-center | --center)
+ *     .pxd-list            przewijana lista
+ *       .pxd-choice          opcja (.pxd-selected, .pxd-disabled)
+ */
