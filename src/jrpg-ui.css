@@ -1,0 +1,94 @@
+/*
+ * jrpg-ui.css — shared layer, theme tokens, and pixel frame.
+ *
+ * Bubble-specific rules live in jrpg-ui-bubble.css and choice-specific rules
+ * in jrpg-ui-choices.css. `style.css` loads all three in cascade order.
+ *
+ * HOW TO REPLACE THE STYLE
+ * 1) Easiest: override the --ui-* variables on .pxd-layer (or on your own class
+ *    passed in configure({ theme: 'my-theme' })):
+ *
+ *      .pxd-layer.my-theme { --ui-bg: #fff; --ui-border: #000; --ui-u: 3px; }
+ *
+ *    Defaults live in :where(), so their specificity is 0
+ *    and any of your rules wins, regardless of stylesheet order.
+ *
+ * 2) Next: override the classes themselves (.pxd-bubble, .pxd-choices, .pxd-choice, ...).
+ *    Class lists are at the end of the respective stylesheets.
+ *
+ * 3) Fully custom look: do not import the default styles and write your own CSS
+ *    for the same class names.
+ */
+
+:where(.pxd-layer) {
+  /* ── "UI pixel" unit ─────────────────────────────── */
+  --ui-u: 4px; /* border thickness, step size, base spacing */
+
+  /* ── Colors ──────────────────────────────────────── */
+  --ui-bg: #1a1a2e;
+  --ui-border: #f5f1e6;
+  --ui-text: #f5f1e6;
+  --ui-accent: #ffd23f; /* speaker name, cursor, arrow, selection */
+
+  /* ── Typography ──────────────────────────────────── */
+  /* You must load the fonts yourself (@font-face). Check Polish character coverage. */
+  --ui-font: "Press Start 2P", "Pixelify Sans", ui-monospace, monospace;
+  --ui-font-size: 16px; /* pixel fonts look best at multiples of their grid */
+  --ui-line-height: 1.75;
+
+  /* ── Dimensions ──────────────────────────────────── */
+  --ui-pad-x: calc(var(--ui-u) * 3);
+  --ui-edge: calc(var(--ui-u) * 4); /* minimum margin from the layer edge */
+  --ui-z: 1000;
+
+  /* Safe areas (notch, gesture bar) – also used in JS for clamping */
+  --ui-safe-t: max(var(--ui-edge), env(safe-area-inset-top, 0px));
+  --ui-safe-r: max(var(--ui-edge), env(safe-area-inset-right, 0px));
+  --ui-safe-b: max(var(--ui-edge), env(safe-area-inset-bottom, 0px));
+  --ui-safe-l: max(var(--ui-edge), env(safe-area-inset-left, 0px));
+}
+
+/* ── Layer ─────────────────────────────────────────────────────────── */
+
+.pxd-layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--ui-z);
+  box-sizing: border-box;
+  padding: var(--ui-safe-t) var(--ui-safe-r) var(--ui-safe-b) var(--ui-safe-l);
+  overflow: hidden;
+  pointer-events: none; /* clicks pass through to the game */
+
+  font-family: var(--ui-font);
+  font-size: var(--ui-font-size);
+  line-height: var(--ui-line-height);
+  color: var(--ui-text);
+
+  -webkit-font-smoothing: none; /* sharp letter edges */
+  text-rendering: optimizeSpeed;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pxd-layer--fixed {
+  position: fixed; /* when root is <body> */
+}
+
+/* Pixel frame: 4 shadows offset by 1 unit → a frame with "cut" corners. */
+:is(.pxd-bubble, .pxd-choices) {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  box-shadow:
+    0 calc(var(--ui-u) * -1) 0 0 var(--ui-border),
+    0 var(--ui-u) 0 0 var(--ui-border),
+    calc(var(--ui-u) * -1) 0 0 0 var(--ui-border),
+    var(--ui-u) 0 0 0 var(--ui-border);
+}
+
+/*
+ * CLASS CHEAT SHEET — SHARED
+ *   .pxd-layer           overlay layer (--fixed when root = body)
+ *
+ * See jrpg-ui-bubble.css and jrpg-ui-choices.css for widget classes.
+ */

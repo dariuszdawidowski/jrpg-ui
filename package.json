@@ -13,13 +13,13 @@
   "main": "./dist/jrpg-ui.js",
   "module": "./dist/jrpg-ui.js",
   "types": "./dist/index.d.ts",
-  "style": "./dist/jrpg-ui-dialog.css",
+  "style": "./dist/style.css",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/jrpg-ui.js"
     },
-    "./style.css": "./dist/jrpg-ui-dialog.css",
+    "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
   },
   "scripts": {

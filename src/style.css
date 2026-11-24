@@ -1,0 +1,9 @@
+/*
+ * style.css — stylesheet entry point.
+ *
+ * Loads the shared theme first, then the widget-specific styles. Consumers
+ * import the built file as `jrpg-ui/style.css`.
+ */
+@import './jrpg-ui.css';
+@import './jrpg-ui-bubble.css';
+@import './jrpg-ui-choices.css';
