@@ -17,16 +17,27 @@
   flex-direction: column;
   width: max-content;
   min-width: calc(var(--jrpg-u) * 30);
-  max-width: calc(100% - 2 * var(--jrpg-edge));
-  max-height: 100%;
+  max-width: calc(100% - var(--jrpg-safe-l) - var(--jrpg-safe-r));
+  max-height: calc(100% - var(--jrpg-safe-t) - var(--jrpg-safe-b));
   padding: var(--jrpg-u) 0;
   pointer-events: auto; /* the only layer element that captures touch/mouse */
 }
 
-.jrpg-choices--bottom-right { right: 0; bottom: 0; }
-.jrpg-choices--bottom-left { left: 0; bottom: 0; }
-.jrpg-choices--bottom-center { left: 0; right: 0; bottom: 0; margin: 0 auto; }
-.jrpg-choices--center { inset: 0; margin: auto; height: fit-content; }
+/* Absolute children ignore the layer's padding, so apply the safe-area insets
+   explicitly. They also leave room for the frame shadow (--jrpg-u). */
+.jrpg-choices--bottom-right { right: var(--jrpg-safe-r); bottom: var(--jrpg-safe-b); }
+.jrpg-choices--bottom-left { left: var(--jrpg-safe-l); bottom: var(--jrpg-safe-b); }
+.jrpg-choices--bottom-center {
+  left: var(--jrpg-safe-l);
+  right: var(--jrpg-safe-r);
+  bottom: var(--jrpg-safe-b);
+  margin: 0 auto;
+}
+.jrpg-choices--center {
+  inset: var(--jrpg-safe-t) var(--jrpg-safe-r) var(--jrpg-safe-b) var(--jrpg-safe-l);
+  margin: auto;
+  height: fit-content;
+}
 
 /* The inner list scrolls, the outer frame stays intact */
 .jrpg-list {
