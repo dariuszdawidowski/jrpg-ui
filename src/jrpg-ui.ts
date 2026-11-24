@@ -160,7 +160,7 @@ export function div(className: string, text?: string): HTMLDivElement {
 /** UI layer inside the container (created on first use). */
 export function getLayer(rootOpt?: HTMLElement): HTMLElement {
   const root = rootOpt ?? config.root ?? document.body
-  let layer = root.querySelector<HTMLElement>(':scope > .pxd-layer')
+  let layer = root.querySelector<HTMLElement>(':scope > .jrpg-layer')
   if (!layer) {
     layer = document.createElement('div')
     if (root !== document.body && getComputedStyle(root).position === 'static') {
@@ -168,7 +168,7 @@ export function getLayer(rootOpt?: HTMLElement): HTMLElement {
     }
     root.appendChild(layer)
   }
-  layer.className = ['pxd-layer', root === document.body ? 'pxd-layer--fixed' : '', config.theme]
+  layer.className = ['jrpg-layer', root === document.body ? 'jrpg-layer--fixed' : '', config.theme]
     .filter(Boolean)
     .join(' ')
   return layer

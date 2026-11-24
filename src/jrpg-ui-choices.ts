@@ -61,11 +61,11 @@ export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> 
   const inputDelay = options.inputDelay ?? getConfig().inputDelay
   const layer = getLayer(options.root)
   const prevFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
-  const id = `pxd-${++uid}`
+  const id = `jrpg-${++uid}`
 
   // ── DOM ──
-  const box = div(`pxd-choices pxd-choices--${position}`)
-  const list = div('pxd-list')
+  const box = div(`jrpg-choices jrpg-choices--${position}`)
+  const list = div('jrpg-list')
   list.setAttribute('role', 'listbox')
   list.tabIndex = -1
   box.append(list)
@@ -74,12 +74,12 @@ export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> 
     const btn = document.createElement('button')
     btn.type = 'button'
     btn.id = `${id}-${i}`
-    btn.className = 'pxd-choice'
+    btn.className = 'jrpg-choice'
     btn.tabIndex = -1; // we handle navigation ourselves; the list keeps focus
     btn.setAttribute('role', 'option')
     btn.textContent = c.label
     if (c.disabled) {
-      btn.classList.add('pxd-disabled')
+      btn.classList.add('jrpg-disabled')
       btn.setAttribute('aria-disabled', 'true')
     }
     list.append(btn)
@@ -96,7 +96,7 @@ export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> 
     const select = (i: number) => {
       index = i
       items.forEach((b, j) => {
-        b.classList.toggle('pxd-selected', j === i)
+        b.classList.toggle('jrpg-selected', j === i)
         b.setAttribute('aria-selected', String(j === i))
       })
       list.setAttribute('aria-activedescendant', items[i].id)

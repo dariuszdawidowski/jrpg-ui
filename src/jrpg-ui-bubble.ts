@@ -107,7 +107,7 @@ function typewrite(
   let raf = 0
   let stopped = false
 
-  const reveal = (i: number) => spans[i].classList.add('pxd-on')
+  const reveal = (i: number) => spans[i].classList.add('jrpg-on')
   const finish = () => {
     if (stopped) return
     stopped = true
@@ -185,32 +185,32 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   const chars = splitGraphemes(text)
 
   // ── DOM ──
-  const el = div('pxd-bubble')
+  const el = div('jrpg-bubble')
   el.setAttribute('role', 'status')
-  if (!anchor) el.classList.add('pxd-bubble--free')
+  if (!anchor) el.classList.add('jrpg-bubble--free')
 
   if (speaker) {
-    const name = div('pxd-name', speaker)
+    const name = div('jrpg-name', speaker)
     name.setAttribute('aria-hidden', 'true')
     el.append(name)
   }
 
-  const textEl = div('pxd-text')
-  textEl.setAttribute('aria-hidden', 'true'); // screen readers get the full text from .pxd-sr, not one letter at a time
+  const textEl = div('jrpg-text')
+  textEl.setAttribute('aria-hidden', 'true'); // screen readers get the full text from .jrpg-sr, not one letter at a time
   const spans = chars.map((c) => {
     const s = document.createElement('span')
-    s.className = 'pxd-ch'
+    s.className = 'jrpg-ch'
     s.textContent = c
     textEl.append(s)
     return s
   })
 
   const sr = document.createElement('span')
-  sr.className = 'pxd-sr'
+  sr.className = 'jrpg-sr'
   sr.textContent = speaker ? `${speaker}: ${text}` : text
 
-  const tail = div('pxd-tail')
-  const next = div('pxd-next')
+  const tail = div('jrpg-tail')
+  const next = div('jrpg-next')
   el.append(textEl, sr, tail, next)
   layer.append(el)
 
@@ -219,7 +219,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
     if (!anchor) return
     const pt = resolveAnchor(anchor, layer)
 
-    el.classList.remove('pxd-bubble--below')
+    el.classList.remove('jrpg-bubble--below')
     const w = el.offsetWidth
     const h = el.offsetHeight
     const cs = getComputedStyle(layer)
@@ -229,14 +229,14 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
     const gap = parseFloat(getComputedStyle(el).marginBottom) || 0
 
     const below = pt.yTop - h - gap < padT; // does not fit above the anchor → place it below
-    el.classList.toggle('pxd-bubble--below', below)
+    el.classList.toggle('jrpg-bubble--below', below)
     const top = below ? pt.yBottom : pt.yTop - h - gap
 
     const left = clamp(pt.x - w / 2, padL, Math.max(padL, layer.clientWidth - padR - w))
     const u = tail.offsetWidth || 4
     const tailX = clamp(pt.x - left, u * 4, w - u * 4); // keep the tail away from the corners
 
-    el.style.setProperty('--pxd-tail-x', `${Math.round(tailX)}px`)
+    el.style.setProperty('--jrpg-tail-x', `${Math.round(tailX)}px`)
     el.style.left = `${Math.round(left)}px`
     el.style.top = `${Math.round(top)}px`
   }
@@ -269,7 +269,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
         }
         if (waiting) {
           waiting = false
-          el.classList.remove('pxd-wait')
+          el.classList.remove('jrpg-wait')
           resolve()
           return true
         }
@@ -290,10 +290,10 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
 
     tw = typewrite(spans, chars, cps, settings.pauses, onChar, () => {
       typing = false
-      el.classList.add('pxd-done')
+      el.classList.add('jrpg-done')
       if (waitForInput) {
         waiting = true
-        el.classList.add('pxd-wait')
+        el.classList.add('jrpg-wait')
       } else {
         resolve()
       }

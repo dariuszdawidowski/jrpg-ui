@@ -4,63 +4,63 @@
  * Shared tokens and the layer/frame live in jrpg-ui.css.
  */
 
-:where(.pxd-layer) {
+:where(.jrpg-layer) {
   /* ── Bubble dimensions ───────────────────────────── */
-  --ui-pad-y: calc(var(--ui-u) * 3);
-  --ui-gap: calc(var(--ui-u) * 3); /* bubble distance from the anchor = tail height */
-  --ui-bubble-max: 420px;
+  --jrpg-pad-y: calc(var(--jrpg-u) * 3);
+  --jrpg-gap: calc(var(--jrpg-u) * 3); /* bubble distance from the anchor = tail height */
+  --jrpg-bubble-max: 420px;
 }
 
 /* ── Bubble ────────────────────────────────────────────────────────── */
 
-.pxd-bubble {
+.jrpg-bubble {
   position: absolute;
   left: 0;
   top: 0;
   box-sizing: border-box;
   width: max-content;
-  max-width: min(var(--ui-bubble-max), calc(100% - 2 * var(--ui-edge)));
-  margin: 0 0 var(--ui-gap); /* margin-bottom = gap above the anchor (read by JS) */
-  padding: var(--ui-pad-y) var(--ui-pad-x);
+  max-width: min(var(--jrpg-bubble-max), calc(100% - 2 * var(--jrpg-edge)));
+  margin: 0 0 var(--jrpg-gap); /* margin-bottom = gap above the anchor (read by JS) */
+  padding: var(--jrpg-pad-y) var(--jrpg-pad-x);
 }
 
 /* Bubble below the anchor (when it does not fit above it) */
-.pxd-bubble--below {
-  margin: var(--ui-gap) 0 0;
+.jrpg-bubble--below {
+  margin: var(--jrpg-gap) 0 0;
 }
 
 /* No anchor: narrator bar at the bottom of the screen, no tail */
-.pxd-bubble--free {
+.jrpg-bubble--free {
   left: 0;
   right: 0;
   top: auto;
-  bottom: var(--ui-safe-b);
+  bottom: var(--jrpg-safe-b);
   margin: 0 auto;
 }
-.pxd-bubble--free .pxd-tail {
+.jrpg-bubble--free .jrpg-tail {
   display: none;
 }
 
-.pxd-name {
-  margin-bottom: var(--ui-u);
-  color: var(--ui-accent);
+.jrpg-name {
+  margin-bottom: var(--jrpg-u);
+  color: var(--jrpg-accent);
 }
 
-.pxd-text {
+.jrpg-text {
   white-space: pre-wrap; /* \n in text = new line */
   overflow-wrap: break-word;
 }
 
 /* Characters: all are in the DOM from the start (stable layout), just invisible. */
-.pxd-ch {
+.jrpg-ch {
   visibility: hidden;
 }
-.pxd-ch.pxd-on {
+.jrpg-ch.jrpg-on {
   visibility: visible;
 }
 
 /* Screen-reader-only text */
-.pxd-sr {
+.jrpg-sr {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -73,54 +73,54 @@
 }
 
 /* Tail: stepped triangle made of shadows (rows 5 → 3 → 1 units).
-   The element is 1×1 unit; JS sets --ui-tail-x (tail center). */
-.pxd-tail {
+   The element is 1×1 unit; JS sets --jrpg-tail-x (tail center). */
+.jrpg-tail {
   position: absolute;
   top: 100%;
-  left: calc(var(--ui-tail-x, 50%) - var(--ui-u) / 2);
-  width: var(--ui-u);
-  height: var(--ui-u);
-  background: var(--ui-bg);
+  left: calc(var(--jrpg-tail-x, 50%) - var(--jrpg-u) / 2);
+  width: var(--jrpg-u);
+  height: var(--jrpg-u);
+  background: var(--jrpg-bg);
   box-shadow:
     /* row 1: fill (covers the bubble's bottom border) */
-    calc(var(--ui-u) * -1) 0 0 0 var(--ui-bg),
-    var(--ui-u) 0 0 0 var(--ui-bg),
+    calc(var(--jrpg-u) * -1) 0 0 0 var(--jrpg-bg),
+    var(--jrpg-u) 0 0 0 var(--jrpg-bg),
     /* row 1: outline */
-    calc(var(--ui-u) * -2) 0 0 0 var(--ui-border),
-    calc(var(--ui-u) * 2) 0 0 0 var(--ui-border),
+    calc(var(--jrpg-u) * -2) 0 0 0 var(--jrpg-border),
+    calc(var(--jrpg-u) * 2) 0 0 0 var(--jrpg-border),
     /* row 2 */
-    0 var(--ui-u) 0 0 var(--ui-bg),
-    calc(var(--ui-u) * -1) var(--ui-u) 0 0 var(--ui-border),
-    var(--ui-u) var(--ui-u) 0 0 var(--ui-border),
+    0 var(--jrpg-u) 0 0 var(--jrpg-bg),
+    calc(var(--jrpg-u) * -1) var(--jrpg-u) 0 0 var(--jrpg-border),
+    var(--jrpg-u) var(--jrpg-u) 0 0 var(--jrpg-border),
     /* row 3: tip */
-    0 calc(var(--ui-u) * 2) 0 0 var(--ui-border);
+    0 calc(var(--jrpg-u) * 2) 0 0 var(--jrpg-border);
 }
-.pxd-bubble--below .pxd-tail {
+.jrpg-bubble--below .jrpg-tail {
   top: auto;
   bottom: 100%;
   transform: scaleY(-1);
 }
 
 /* "Next" arrow (after all text is typed, when the bubble waits for input) */
-.pxd-next {
+.jrpg-next {
   display: none;
   position: absolute;
-  right: calc(var(--ui-u) * 2);
-  bottom: calc(var(--ui-u) * 0.5);
-  width: calc(var(--ui-u) * 5);
-  height: calc(var(--ui-u) * 3);
-  background: var(--ui-accent);
+  right: calc(var(--jrpg-u) * 2);
+  bottom: calc(var(--jrpg-u) * 0.5);
+  width: calc(var(--jrpg-u) * 5);
+  height: calc(var(--jrpg-u) * 3);
+  background: var(--jrpg-accent);
   clip-path: polygon(
     0 0, 100% 0, 100% 34%, 80% 34%, 80% 67%, 60% 67%,
     60% 100%, 40% 100%, 40% 67%, 20% 67%, 20% 34%, 0 34%
   );
-  animation: pxd-blink 1s linear infinite;
+  animation: jrpg-blink 1s linear infinite;
 }
-.pxd-bubble.pxd-wait .pxd-next {
+.jrpg-bubble.jrpg-wait .jrpg-next {
   display: block;
 }
 
-@keyframes pxd-blink {
+@keyframes jrpg-blink {
   0%, 55% { opacity: 1; }
   56%, 100% { opacity: 0; }
 }
@@ -128,18 +128,18 @@
 /* ── Motion reduced at the system's request ────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .pxd-next {
+  .jrpg-next {
     animation: none;
   }
 }
 
 /*
  * CLASS CHEAT SHEET — BUBBLE
- *   .pxd-bubble          bubble (--below, --free; states: .pxd-done, .pxd-wait)
- *     .pxd-name            speaker name
- *     .pxd-text            text
- *       .pxd-ch            single character (.pxd-on = revealed)
- *     .pxd-tail            tail
- *     .pxd-next            "next" arrow
- *     .pxd-sr              screen-reader text
+ *   .jrpg-bubble          bubble (--below, --free; states: .jrpg-done, .jrpg-wait)
+ *     .jrpg-name            speaker name
+ *     .jrpg-text            text
+ *       .jrpg-ch            single character (.jrpg-on = revealed)
+ *     .jrpg-tail            tail
+ *     .jrpg-next            "next" arrow
+ *     .jrpg-sr              screen-reader text
  */

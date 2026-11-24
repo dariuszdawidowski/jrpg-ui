@@ -4,32 +4,32 @@
  * Shared tokens and the layer/frame live in jrpg-ui.css.
  */
 
-:where(.pxd-layer) {
-  --ui-muted: #6e6e8f; /* disabled options */
+:where(.jrpg-layer) {
+  --jrpg-muted: #6e6e8f; /* disabled options */
 }
 
 /* ── Answer selection ──────────────────────────────────────────────── */
 
-.pxd-choices {
+.jrpg-choices {
   position: absolute;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   width: max-content;
-  min-width: calc(var(--ui-u) * 30);
-  max-width: calc(100% - 2 * var(--ui-edge));
+  min-width: calc(var(--jrpg-u) * 30);
+  max-width: calc(100% - 2 * var(--jrpg-edge));
   max-height: 100%;
-  padding: var(--ui-u) 0;
+  padding: var(--jrpg-u) 0;
   pointer-events: auto; /* the only layer element that captures touch/mouse */
 }
 
-.pxd-choices--bottom-right { right: 0; bottom: 0; }
-.pxd-choices--bottom-left { left: 0; bottom: 0; }
-.pxd-choices--bottom-center { left: 0; right: 0; bottom: 0; margin: 0 auto; }
-.pxd-choices--center { inset: 0; margin: auto; height: fit-content; }
+.jrpg-choices--bottom-right { right: 0; bottom: 0; }
+.jrpg-choices--bottom-left { left: 0; bottom: 0; }
+.jrpg-choices--bottom-center { left: 0; right: 0; bottom: 0; margin: 0 auto; }
+.jrpg-choices--center { inset: 0; margin: auto; height: fit-content; }
 
 /* The inner list scrolls, the outer frame stays intact */
-.pxd-list {
+.jrpg-list {
   position: relative; /* needed for offsetTop in JS */
   min-height: 0;
   overflow-y: auto;
@@ -37,20 +37,20 @@
   scrollbar-width: none;
   outline: none;
 }
-.pxd-list::-webkit-scrollbar {
+.jrpg-list::-webkit-scrollbar {
   display: none;
 }
 
-.pxd-choice {
+.jrpg-choice {
   appearance: none;
   position: relative;
   display: flex;
   align-items: center;
   box-sizing: border-box;
   width: 100%;
-  min-height: calc(var(--ui-u) * 11); /* ≥ 44 px for a finger at the default unit */
+  min-height: calc(var(--jrpg-u) * 11); /* ≥ 44 px for a finger at the default unit */
   margin: 0;
-  padding: var(--ui-u) var(--ui-pad-x) var(--ui-u) calc(var(--ui-u) * 8);
+  padding: var(--jrpg-u) var(--jrpg-pad-x) var(--jrpg-u) calc(var(--jrpg-u) * 8);
   border: 0;
   background: none;
   color: inherit;
@@ -61,15 +61,15 @@
 }
 
 /* Cursor: stepped right arrow, visible only on the selected option */
-.pxd-choice::before {
+.jrpg-choice::before {
   content: "";
   position: absolute;
-  left: calc(var(--ui-u) * 3);
+  left: calc(var(--jrpg-u) * 3);
   top: 50%;
-  width: calc(var(--ui-u) * 3);
-  height: calc(var(--ui-u) * 5);
-  margin-top: calc(var(--ui-u) * -2.5);
-  background: var(--ui-accent);
+  width: calc(var(--jrpg-u) * 3);
+  height: calc(var(--jrpg-u) * 5);
+  margin-top: calc(var(--jrpg-u) * -2.5);
+  background: var(--jrpg-accent);
   clip-path: polygon(
     0 0, 34% 0, 34% 20%, 67% 20%, 67% 40%, 100% 40%,
     100% 60%, 67% 60%, 67% 80%, 34% 80%, 34% 100%, 0 100%
@@ -77,21 +77,21 @@
   visibility: hidden;
 }
 
-.pxd-choice.pxd-selected {
-  color: var(--ui-accent);
+.jrpg-choice.jrpg-selected {
+  color: var(--jrpg-accent);
 }
-.pxd-choice.pxd-selected::before {
+.jrpg-choice.jrpg-selected::before {
   visibility: visible;
 }
 
-.pxd-choice.pxd-disabled {
-  color: var(--ui-muted);
+.jrpg-choice.jrpg-disabled {
+  color: var(--jrpg-muted);
   cursor: default;
 }
 
 /*
  * CLASS CHEAT SHEET — CHOICES
- *   .pxd-choices         choice panel (--bottom-right | --bottom-left | --bottom-center | --center)
- *     .pxd-list            scrollable list
- *       .pxd-choice          option (.pxd-selected, .pxd-disabled)
+ *   .jrpg-choices         choice panel (--bottom-right | --bottom-left | --bottom-center | --center)
+ *     .jrpg-list            scrollable list
+ *       .jrpg-choice          option (.jrpg-selected, .jrpg-disabled)
  */
