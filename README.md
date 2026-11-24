@@ -32,11 +32,4 @@
 - Document TypeScript code in English using TSDoc-compatible `/** ... */` comments on exported classes, interfaces, functions, public methods, and properties whose contracts are not obvious. Describe purpose, behaviour, side effects, units, defaults, and important constraints.
 - Use `@param name - description`, `@returns`, `@throws`, `@typeParam`, and `@remarks` where useful. Do not repeat TypeScript types with JSDoc `{Type}` annotations. Keep comments accurate when changing code.
 - Explain non-obvious algorithms, lifecycle requirements, and design decisions with concise comments. Avoid comments that merely restate straightforward code.
-## Directory layout
-
-```text
-docs/         - documentation files
-src/          - typescript source code
-```
-
 
