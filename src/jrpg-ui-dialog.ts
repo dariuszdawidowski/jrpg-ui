@@ -1,83 +1,83 @@
 /**
  * jrpg-ui-dialog
  *
- * Dwie niezależne funkcje, wywoływane z kodu i zwracające Promise:
- *   - showBubble(text, opts)    chmurka z efektem maszyny do pisania
- *   - showChoices(choices, opts) wybór odpowiedzi
+ * Two independent Promise-based functions called from game code:
+ *   - showBubble(text, opts)    speech bubble with a typewriter effect
+ *   - showChoices(choices, opts) answer selection
  *
- * Całość to nakładka HTML na grę (canvas). Wygląd jest w jrpg-ui-dialog.css.
+ * Everything is an HTML overlay on top of the game (canvas). Styling lives in jrpg-ui-dialog.css.
  *
- * Wymaga: ES2020+, DOM. Do tsconfig najlepiej "target": "ES2022".
+ * Requires ES2020+ and DOM. In tsconfig, prefer "target": "ES2022".
  */
 
 // ─────────────────────────────────────────────────────────────────────
-// Typy publiczne
+// Public types
 // ─────────────────────────────────────────────────────────────────────
 
-/** Abstrakcyjne akcje wejścia. Możesz je wysyłać ręcznie (np. z gamepada) przez sendInput(). */
+/** Abstract input actions. You can send them manually (e.g. from a gamepad) via sendInput(). */
 export type Action = 'confirm' | 'cancel' | 'up' | 'down';
 
 /**
- * Punkt, na który wskazuje ogonek chmurki.
- * - { x, y }: współrzędne w pikselach CSS względem warstwy UI (czyli kontenera gry)
- * - HTMLElement: ogonek wskaże górną (lub dolną) krawędź elementu, jego środek w poziomie
+ * Point the bubble tail points at.
+ * - { x, y }: CSS pixel coordinates relative to the UI layer (i.e. the game container)
+ * - HTMLElement: the tail points at the element's top (or bottom) edge, horizontally centered
  */
 export type Anchor = HTMLElement | { x: number; y: number };
 
 export interface BubbleOptions {
-  /** Gdzie ma wskazywać ogonek. Bez tego: pasek narratora na dole ekranu, bez ogonka. */
+  /** Where the tail should point. Without it: a narrator bar at the bottom of the screen, no tail. */
   anchor?: Anchor;
-  /** Imię mówiącego, wyświetlane nad tekstem. */
+  /** Speaker name displayed above the text. */
   speaker?: string;
-  /** Znaków na sekundę. 0 / Infinity = tekst od razu. Domyślnie z configure(). */
+  /** Characters per second. 0 / Infinity = instant text. Defaults to configure(). */
   cps?: number;
   /**
-   * true (domyślnie): Promise rozwiązuje się po dopisaniu tekstu I potwierdzeniu przez gracza.
-   * false: rozwiązuje się zaraz po dopisaniu tekstu (przydatne tuż przed showChoices).
+   * true (default): the Promise resolves after the text is typed AND the player confirms.
+   * false: resolves as soon as the text is typed (useful right before showChoices).
    */
   waitForInput?: boolean;
-  /** Wywoływane po odsłonięciu każdej widocznej litery (spacje i enter pomijane). Tu podepnij "blip". */
+  /** Called after each visible character is revealed (spaces and enter skipped). Hook up a "blip" here. */
   onChar?: (char: string, index: number) => void;
-  /** Przerwanie: chmurka znika, a Promise odrzuca się z AbortError. */
+  /** Abort: the bubble disappears and the Promise rejects with AbortError. */
   signal?: AbortSignal;
-  /** Kontener dla warstwy UI. Domyślnie z configure() lub document.body. */
+  /** UI layer container. Defaults to configure() or document.body. */
   root?: HTMLElement;
 }
 
 export interface Choice<T> {
   label: string;
   value: T;
-  /** Opcja widoczna, ale niewybieralna. */
+  /** Visible but not selectable. */
   disabled?: boolean;
 }
 
 export interface ChoicesOptions<T> {
   position?: 'bottom-right' | 'bottom-left' | 'bottom-center' | 'center';
-  /** Która opcja jest zaznaczona na starcie (domyślnie pierwsza aktywna). */
+  /** Which option is selected initially (defaults to the first enabled one). */
   initialIndex?: number;
-  /** Jeśli podane, Escape / "cancel" zwraca tę wartość. Bez tego anulowanie jest wyłączone. */
+  /** If provided, Escape / "cancel" returns this value. Without it, cancellation is disabled. */
   cancelValue?: T;
-  /** Ile ms po pojawieniu się opcji ignorować potwierdzenie (ochrona przed przypadkowym kliknięciem). */
+  /** How many ms after the options appear to ignore confirmation (protects against accidental clicks). */
   inputDelay?: number;
   signal?: AbortSignal;
   root?: HTMLElement;
 }
 
 export interface DialogConfig {
-  /** Kontener warstwy UI. Gdy nie jest to <body>, powinien mieć position: relative/absolute. */
+  /** UI layer container. When not <body>, it should have position: relative/absolute. */
   root: HTMLElement | null;
-  /** Dodatkowa klasa CSS dla warstwy (przełączanie motywów). */
+  /** Extra CSS class for the layer (theme switching). */
   theme: string;
   cps: number;
   inputDelay: number;
-  /** Pauza w ms po danym znaku (np. '.': 280). Zastępuje całą tabelę. */
+  /** Pause in ms after a given character (e.g. '.': 280). Replaces the whole table. */
   pauses: Record<string, number>;
-  /** Klawisze (wartości KeyboardEvent.key, bez rozróżniania wielkości liter). */
+  /** Keys (KeyboardEvent.key values, case-insensitive). */
   keys: Record<Action, string[]>;
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Konfiguracja
+// Configuration
 // ─────────────────────────────────────────────────────────────────────
 
 const config: DialogConfig = {
@@ -103,13 +103,13 @@ export function configure(
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Stan wewnętrzny: naraz jedna chmurka i jeden wybór
+// Internal state: one bubble and one choice at a time
 // ─────────────────────────────────────────────────────────────────────
 
 interface BubbleState {
-  /** Zwraca true, jeśli akcja została zużyta. */
+  /** Returns true if the action was consumed. */
   onAction(action: Action): boolean;
-  /** Zamyka chmurkę; oczekujący Promise się rozwiązuje. */
+  /** Closes the bubble; the pending Promise resolves. */
   close(): void;
 }
 
@@ -122,7 +122,7 @@ let bubbleState: BubbleState | null = null;
 let choicesState: ChoicesState | null = null;
 
 // ─────────────────────────────────────────────────────────────────────
-// Funkcje pomocnicze
+// Helpers
 // ─────────────────────────────────────────────────────────────────────
 
 const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
@@ -138,7 +138,7 @@ function div(className: string, text?: string): HTMLDivElement {
   return el;
 }
 
-// Intl.Segmenter dzieli na grafemy (emoji, znaki złożone). Fallback: punkty kodowe.
+// Intl.Segmenter splits into graphemes (emoji, combined characters). Fallback: code points.
 type SegmenterCtor = new (
   locale?: string,
   options?: { granularity: 'grapheme' },
@@ -151,7 +151,7 @@ function splitGraphemes(text: string): string[] {
   return segmenter ? Array.from(segmenter.segment(text), (s) => s.segment) : Array.from(text);
 }
 
-/** Warstwa UI w kontenerze (tworzona przy pierwszym użyciu). */
+/** UI layer inside the container (created on first use). */
 function getLayer(rootOpt?: HTMLElement): HTMLElement {
   const root = rootOpt ?? config.root ?? document.body;
   let layer = root.querySelector<HTMLElement>(':scope > .pxd-layer');
@@ -172,7 +172,7 @@ function resolveAnchor(anchor: Anchor, layer: HTMLElement): { x: number; yTop: n
   if (!(anchor instanceof HTMLElement)) return { x: anchor.x, yTop: anchor.y, yBottom: anchor.y };
   const r = anchor.getBoundingClientRect();
   const l = layer.getBoundingClientRect();
-  // Jeśli kontener gry jest skalowany transformem, przeliczamy z powrotem na piksele CSS warstwy.
+  // If the game container is scaled by a transform, convert back to the layer's CSS pixels.
   const scale = layer.offsetWidth ? l.width / layer.offsetWidth : 1;
   return {
     x: (r.left + r.width / 2 - l.left) / scale,
@@ -182,18 +182,18 @@ function resolveAnchor(anchor: Anchor, layer: HTMLElement): { x: number; yTop: n
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Wejście: jeden router dla klawiatury, dotyku/myszy i dowolnego źródła (gamepad)
+// Input: one router for keyboard, touch/mouse, and any source (gamepad)
 // ─────────────────────────────────────────────────────────────────────
 
-/** Czy któraś chmurka lub wybór jest teraz widoczny (np. do blokowania wejścia gry). */
+/** Whether any bubble or choice is currently visible (e.g. to block game input). */
 export function isDialogVisible(): boolean {
   return bubbleState !== null || choicesState !== null;
 }
 
 /**
- * Wysyła akcję do aktywnego okna. Użyj do gamepada:
+ * Sends an action to the active window. Use it for a gamepad:
  *   if (padA.pressed) sendInput('confirm');
- * Zwraca true, jeśli akcja została zużyta.
+ * Returns true if the action was consumed.
  */
 export function sendInput(action: Action): boolean {
   if (choicesState) return choicesState.onAction(action);
@@ -218,20 +218,20 @@ function ensureListeners(): void {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const action = keyToAction(e.key);
     if (!action) return;
-    // Przytrzymany klawisz nie powinien przeskakiwać kolejnych kwestii.
+    // A held key should not skip through consecutive lines.
     if (e.repeat && (action === 'confirm' || action === 'cancel')) return;
     if (sendInput(action)) e.preventDefault();
   });
 
   document.addEventListener('pointerdown', (e) => {
-    // Gdy widoczny jest wybór, klik obsługują jego przyciski (zdarzenie click).
+    // While choices are visible, their buttons handle clicks (the click event).
     if (e.button !== 0 || choicesState) return;
     sendInput('confirm');
   });
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Maszyna do pisania
+// Typewriter
 // ─────────────────────────────────────────────────────────────────────
 
 interface Typewriter {
@@ -242,7 +242,7 @@ interface Typewriter {
 function pauseAfter(char: string, next: string | undefined, pauses: Record<string, number>): number {
   const p = pauses[char] ?? 0;
   if (!p || next === undefined) return 0;
-  // "..." albo "?!" → pauza dopiero po ostatnim znaku; to samo przed zamykającym cudzysłowem.
+  // "..." or "?!" → pause only after the last character; same before a closing quote.
   if (next in pauses || /["'”’»)\]]/.test(next)) return 0;
   return p;
 }
@@ -287,7 +287,7 @@ function typewrite(
 
   const tick = (now: number) => {
     if (stopped) return;
-    // Po uśpieniu karty nie nadrabiamy zaległości lawiną liter.
+    // After the tab wakes from sleep, do not catch up with an avalanche of letters.
     if (!nextAt || now - nextAt > 250) nextAt = now;
 
     while (shown < chars.length && now >= nextAt) {
@@ -313,11 +313,11 @@ function typewrite(
 // ─────────────────────────────────────────────────────────────────────
 
 /**
- * Pokazuje chmurkę z tekstem pisanym litera po literze.
+ * Shows a bubble with text typed character by character.
  *
- * Pierwsze potwierdzenie w trakcie pisania odsłania cały tekst, kolejne kończy kwestię.
- * Po rozwiązaniu Promise chmurka zostaje na ekranie, dopóki nie wywołasz
- * hideBubble() lub nie pokażesz następnej chmurki.
+ * The first confirmation while typing reveals the whole text; the next one ends the line.
+ * After the Promise resolves the bubble stays on screen until you call
+ * hideBubble() or show another bubble.
  */
 export async function showBubble(text: string, options: BubbleOptions = {}): Promise<void> {
   const { anchor, speaker, signal, onChar } = options;
@@ -325,7 +325,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   const cps = options.cps ?? config.cps;
 
   if (signal?.aborted) throw abortError(signal);
-  // Pomiar layoutu przed załadowaniem fontu dałby złe wymiary.
+  // Measuring layout before the font loads would give wrong dimensions.
   if (document.fonts && document.fonts.status === 'loading') await document.fonts.ready;
   if (signal?.aborted) throw abortError(signal);
 
@@ -347,7 +347,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   }
 
   const textEl = div('pxd-text');
-  textEl.setAttribute('aria-hidden', 'true'); // czytnik dostaje pełny tekst z .pxd-sr, nie litery po jednej
+  textEl.setAttribute('aria-hidden', 'true'); // screen readers get the full text from .pxd-sr, not one letter at a time
   const spans = chars.map((c) => {
     const s = document.createElement('span');
     s.className = 'pxd-ch';
@@ -365,7 +365,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   el.append(textEl, sr, tail, next);
   layer.append(el);
 
-  // ── Pozycjonowanie: raz przy starcie i przy zmianie rozmiaru warstwy ──
+  // ── Positioning: once at startup and when the layer is resized ──
   const place = () => {
     if (!anchor) return;
     const pt = resolveAnchor(anchor, layer);
@@ -379,13 +379,13 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
     const padR = parseFloat(cs.paddingRight) || 0;
     const gap = parseFloat(getComputedStyle(el).marginBottom) || 0;
 
-    const below = pt.yTop - h - gap < padT; // nie mieści się nad kotwicą → pod nią
+    const below = pt.yTop - h - gap < padT; // does not fit above the anchor → place it below
     el.classList.toggle('pxd-bubble--below', below);
     const top = below ? pt.yBottom : pt.yTop - h - gap;
 
     const left = clamp(pt.x - w / 2, padL, Math.max(padL, layer.clientWidth - padR - w));
     const u = tail.offsetWidth || 4;
-    const tailX = clamp(pt.x - left, u * 4, w - u * 4); // ogonek nie wchodzi na rogi
+    const tailX = clamp(pt.x - left, u * 4, w - u * 4); // keep the tail away from the corners
 
     el.style.setProperty('--pxd-tail-x', `${Math.round(tailX)}px`);
     el.style.left = `${Math.round(left)}px`;
@@ -450,7 +450,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   });
 }
 
-/** Zamyka bieżącą chmurkę. Jeśli ktoś na nią czekał, jego Promise się rozwiązuje. */
+/** Closes the current bubble. If someone was waiting for it, their Promise resolves. */
 export function hideBubble(): void {
   bubbleState?.close();
 }
@@ -462,18 +462,18 @@ export function hideBubble(): void {
 let uid = 0;
 
 /**
- * Pokazuje listę odpowiedzi i zwraca `value` wybranej opcji.
- * Sterowanie: strzałki/WS, Enter/Spacja/Z, Escape/X (tylko z cancelValue), mysz, dotyk, sendInput().
+ * Shows a list of answers and returns the `value` of the selected option.
+ * Controls: arrows/W-S, Enter/Space/Z, Escape/X (only with cancelValue), mouse, touch, sendInput().
  */
 export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> = {}): Promise<T> {
   if (!choices.some((c) => !c.disabled)) {
-    return Promise.reject(new Error('showChoices: potrzebna co najmniej jedna aktywna opcja'));
+    return Promise.reject(new Error('showChoices: at least one enabled option is required'));
   }
   const { position = 'bottom-right', signal } = options;
   if (signal?.aborted) return Promise.reject(abortError(signal));
 
   ensureListeners();
-  choicesState?.abort(new DOMException('Zastąpione nowym wyborem', 'AbortError'));
+  choicesState?.abort(new DOMException('Replaced by a new choice', 'AbortError'));
 
   const hasCancel = 'cancelValue' in options;
   const inputDelay = options.inputDelay ?? config.inputDelay;
@@ -493,7 +493,7 @@ export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> 
     btn.type = 'button';
     btn.id = `${id}-${i}`;
     btn.className = 'pxd-choice';
-    btn.tabIndex = -1; // nawigację robimy sami; fokus trzyma lista
+    btn.tabIndex = -1; // we handle navigation ourselves; the list keeps focus
     btn.setAttribute('role', 'option');
     btn.textContent = c.label;
     if (c.disabled) {
@@ -519,7 +519,7 @@ export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> 
       });
       list.setAttribute('aria-activedescendant', items[i].id);
 
-      // Ręczne przewijanie listy (scrollIntoView mógłby przesunąć całą warstwę).
+      // Manual list scrolling (scrollIntoView could scroll the whole layer).
       const b = items[i];
       if (b.offsetTop < list.scrollTop) list.scrollTop = b.offsetTop;
       else if (b.offsetTop + b.offsetHeight > list.scrollTop + list.clientHeight) {
@@ -579,7 +579,7 @@ export function showChoices<T>(choices: Choice<T>[], options: ChoicesOptions<T> 
       btn.addEventListener('click', () => {
         if (performance.now() >= readyAt && !choices[i].disabled) finish(choices[i].value);
       });
-      // Podświetlanie hoverem tylko dla myszy; dotyk wybiera od razu przez click.
+      // Highlight on hover for mouse only; touch selects immediately via click.
       btn.addEventListener('pointerenter', (e) => {
         if (e.pointerType === 'mouse' && !choices[i].disabled) select(i);
       });

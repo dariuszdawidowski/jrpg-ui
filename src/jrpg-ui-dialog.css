@@ -1,55 +1,55 @@
 /*
- * pixel-dialog.css — domyślny motyw pixel-art
+ * pixel-dialog.css — default pixel-art theme
  *
- * JAK PODMIENIĆ STYL
- * 1) Najprościej: nadpisz zmienne --pxd-* na .pxd-layer (lub na własnej klasie
- *    przekazanej w configure({ theme: 'moj-motyw' })):
+ * HOW TO REPLACE THE STYLE
+ * 1) Easiest: override the --pxd-* variables on .pxd-layer (or on your own class
+ *    passed in configure({ theme: 'my-theme' })):
  *
- *      .pxd-layer.moj-motyw { --pxd-bg: #fff; --pxd-border: #000; --pxd-u: 3px; }
+ *      .pxd-layer.my-theme { --pxd-bg: #fff; --pxd-border: #000; --pxd-u: 3px; }
  *
- *    Domyślne wartości są w :where(), więc ich specyficzność wynosi 0
- *    i każda Twoja reguła wygra, niezależnie od kolejności arkuszy.
+ *    Defaults live in :where(), so their specificity is 0
+ *    and any of your rules wins, regardless of stylesheet order.
  *
- * 2) Dalej: nadpisz same klasy (.pxd-bubble, .pxd-choices, .pxd-choice, ...).
- *    Lista klas znajduje się na końcu pliku.
+ * 2) Next: override the classes themselves (.pxd-bubble, .pxd-choices, .pxd-choice, ...).
+ *    The class list is at the end of the file.
  *
- * 3) Całkiem własny wygląd: nie importuj tego pliku i napisz własny CSS
- *    dla tych samych klas.
+ * 3) Fully custom look: do not import this file and write your own CSS
+ *    for the same class names.
  */
 
 :where(.pxd-layer) {
-  /* ── Jednostka "piksela interfejsu" ─────────────────────────────── */
-  --pxd-u: 4px; /* grubość ramki, krok schodków, bazowy odstęp */
+  /* ── "UI pixel" unit ─────────────────────────────── */
+  --pxd-u: 4px; /* border thickness, step size, base spacing */
 
-  /* ── Kolory ──────────────────────────────────────────────────────── */
+  /* ── Colors ──────────────────────────────────────── */
   --pxd-bg: #1a1a2e;
   --pxd-border: #f5f1e6;
   --pxd-text: #f5f1e6;
-  --pxd-accent: #ffd23f; /* imię mówiącego, kursor, strzałka, zaznaczenie */
-  --pxd-muted: #6e6e8f; /* opcje wyłączone */
+  --pxd-accent: #ffd23f; /* speaker name, cursor, arrow, selection */
+  --pxd-muted: #6e6e8f; /* disabled options */
 
-  /* ── Typografia ──────────────────────────────────────────────────── */
-  /* Fonty musisz załadować sam (@font-face). Sprawdź pokrycie polskich znaków. */
+  /* ── Typography ──────────────────────────────────── */
+  /* You must load the fonts yourself (@font-face). Check Polish character coverage. */
   --pxd-font: "Press Start 2P", "Pixelify Sans", ui-monospace, monospace;
-  --pxd-font-size: 16px; /* fonty pikselowe najlepiej wyglądają przy wielokrotnościach ich siatki */
+  --pxd-font-size: 16px; /* pixel fonts look best at multiples of their grid */
   --pxd-line-height: 1.75;
 
-  /* ── Wymiary ─────────────────────────────────────────────────────── */
+  /* ── Dimensions ──────────────────────────────────── */
   --pxd-pad-x: calc(var(--pxd-u) * 3);
   --pxd-pad-y: calc(var(--pxd-u) * 3);
-  --pxd-gap: calc(var(--pxd-u) * 3); /* odstęp chmurki od kotwicy = wysokość ogonka */
+  --pxd-gap: calc(var(--pxd-u) * 3); /* bubble distance from the anchor = tail height */
   --pxd-bubble-max: 420px;
-  --pxd-edge: calc(var(--pxd-u) * 4); /* minimalny margines od krawędzi warstwy */
+  --pxd-edge: calc(var(--pxd-u) * 4); /* minimum margin from the layer edge */
   --pxd-z: 1000;
 
-  /* Marginesy bezpieczne (notch, pasek gestów) – używane też w JS do clampowania */
+  /* Safe areas (notch, gesture bar) – also used in JS for clamping */
   --pxd-safe-t: max(var(--pxd-edge), env(safe-area-inset-top, 0px));
   --pxd-safe-r: max(var(--pxd-edge), env(safe-area-inset-right, 0px));
   --pxd-safe-b: max(var(--pxd-edge), env(safe-area-inset-bottom, 0px));
   --pxd-safe-l: max(var(--pxd-edge), env(safe-area-inset-left, 0px));
 }
 
-/* ── Warstwa ───────────────────────────────────────────────────────── */
+/* ── Layer ─────────────────────────────────────────────────────────── */
 
 .pxd-layer {
   position: absolute;
@@ -58,14 +58,14 @@
   box-sizing: border-box;
   padding: var(--pxd-safe-t) var(--pxd-safe-r) var(--pxd-safe-b) var(--pxd-safe-l);
   overflow: hidden;
-  pointer-events: none; /* kliknięcia przechodzą do gry */
+  pointer-events: none; /* clicks pass through to the game */
 
   font-family: var(--pxd-font);
   font-size: var(--pxd-font-size);
   line-height: var(--pxd-line-height);
   color: var(--pxd-text);
 
-  -webkit-font-smoothing: none; /* ostre krawędzie liter */
+  -webkit-font-smoothing: none; /* sharp letter edges */
   text-rendering: optimizeSpeed;
   -webkit-user-select: none;
   user-select: none;
@@ -73,10 +73,10 @@
 }
 
 .pxd-layer--fixed {
-  position: fixed; /* gdy root to <body> */
+  position: fixed; /* when root is <body> */
 }
 
-/* Ramka pikselowa: 4 cienie przesunięte o 1 jednostkę → ramka z "ściętymi" rogami. */
+/* Pixel frame: 4 shadows offset by 1 unit → a frame with "cut" corners. */
 :is(.pxd-bubble, .pxd-choices) {
   background: var(--pxd-bg);
   color: var(--pxd-text);
@@ -87,7 +87,7 @@
     var(--pxd-u) 0 0 0 var(--pxd-border);
 }
 
-/* ── Chmurka ───────────────────────────────────────────────────────── */
+/* ── Bubble ────────────────────────────────────────────────────────── */
 
 .pxd-bubble {
   position: absolute;
@@ -96,16 +96,16 @@
   box-sizing: border-box;
   width: max-content;
   max-width: min(var(--pxd-bubble-max), calc(100% - 2 * var(--pxd-edge)));
-  margin: 0 0 var(--pxd-gap); /* margin-bottom = odstęp nad kotwicą (czyta go JS) */
+  margin: 0 0 var(--pxd-gap); /* margin-bottom = gap above the anchor (read by JS) */
   padding: var(--pxd-pad-y) var(--pxd-pad-x);
 }
 
-/* Chmurka pod kotwicą (gdy nie mieści się nad nią) */
+/* Bubble below the anchor (when it does not fit above it) */
 .pxd-bubble--below {
   margin: var(--pxd-gap) 0 0;
 }
 
-/* Bez kotwicy: pasek narratora na dole ekranu, bez ogonka */
+/* No anchor: narrator bar at the bottom of the screen, no tail */
 .pxd-bubble--free {
   left: 0;
   right: 0;
@@ -123,11 +123,11 @@
 }
 
 .pxd-text {
-  white-space: pre-wrap; /* \n w tekście = nowa linia */
+  white-space: pre-wrap; /* \n in text = new line */
   overflow-wrap: break-word;
 }
 
-/* Litery: wszystkie są w DOM od początku (stały layout), tylko niewidoczne. */
+/* Characters: all are in the DOM from the start (stable layout), just invisible. */
 .pxd-ch {
   visibility: hidden;
 }
@@ -135,7 +135,7 @@
   visibility: visible;
 }
 
-/* Tekst tylko dla czytników ekranu */
+/* Screen-reader-only text */
 .pxd-sr {
   position: absolute;
   width: 1px;
@@ -148,8 +148,8 @@
   border: 0;
 }
 
-/* Ogonek: schodkowy trójkąt zrobiony z cieni (rzędy 5 → 3 → 1 jednostek).
-   Element ma rozmiar 1×1 jednostki; --pxd-tail-x ustawia JS (środek ogonka). */
+/* Tail: stepped triangle made of shadows (rows 5 → 3 → 1 units).
+   The element is 1×1 unit; JS sets --pxd-tail-x (tail center). */
 .pxd-tail {
   position: absolute;
   top: 100%;
@@ -158,17 +158,17 @@
   height: var(--pxd-u);
   background: var(--pxd-bg);
   box-shadow:
-    /* rząd 1: wypełnienie (zakrywa dolną ramkę chmurki) */
+    /* row 1: fill (covers the bubble's bottom border) */
     calc(var(--pxd-u) * -1) 0 0 0 var(--pxd-bg),
     var(--pxd-u) 0 0 0 var(--pxd-bg),
-    /* rząd 1: kontur */
+    /* row 1: outline */
     calc(var(--pxd-u) * -2) 0 0 0 var(--pxd-border),
     calc(var(--pxd-u) * 2) 0 0 0 var(--pxd-border),
-    /* rząd 2 */
+    /* row 2 */
     0 var(--pxd-u) 0 0 var(--pxd-bg),
     calc(var(--pxd-u) * -1) var(--pxd-u) 0 0 var(--pxd-border),
     var(--pxd-u) var(--pxd-u) 0 0 var(--pxd-border),
-    /* rząd 3: czubek */
+    /* row 3: tip */
     0 calc(var(--pxd-u) * 2) 0 0 var(--pxd-border);
 }
 .pxd-bubble--below .pxd-tail {
@@ -177,7 +177,7 @@
   transform: scaleY(-1);
 }
 
-/* Strzałka "dalej" (po dopisaniu całego tekstu, gdy chmurka czeka na input) */
+/* "Next" arrow (after all text is typed, when the bubble waits for input) */
 .pxd-next {
   display: none;
   position: absolute;
@@ -201,7 +201,7 @@
   56%, 100% { opacity: 0; }
 }
 
-/* ── Wybór odpowiedzi ──────────────────────────────────────────────── */
+/* ── Answer selection ──────────────────────────────────────────────── */
 
 .pxd-choices {
   position: absolute;
@@ -213,7 +213,7 @@
   max-width: calc(100% - 2 * var(--pxd-edge));
   max-height: 100%;
   padding: var(--pxd-u) 0;
-  pointer-events: auto; /* jedyny element warstwy, który łapie dotyk/mysz */
+  pointer-events: auto; /* the only layer element that captures touch/mouse */
 }
 
 .pxd-choices--bottom-right { right: 0; bottom: 0; }
@@ -221,9 +221,9 @@
 .pxd-choices--bottom-center { left: 0; right: 0; bottom: 0; margin: 0 auto; }
 .pxd-choices--center { inset: 0; margin: auto; height: fit-content; }
 
-/* Wewnętrzna lista przewija się, ramka zewnętrzna zostaje nietknięta */
+/* The inner list scrolls, the outer frame stays intact */
 .pxd-list {
-  position: relative; /* potrzebne do offsetTop w JS */
+  position: relative; /* needed for offsetTop in JS */
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -241,7 +241,7 @@
   align-items: center;
   box-sizing: border-box;
   width: 100%;
-  min-height: calc(var(--pxd-u) * 11); /* ≥ 44 px pod palec przy domyślnej jednostce */
+  min-height: calc(var(--pxd-u) * 11); /* ≥ 44 px for a finger at the default unit */
   margin: 0;
   padding: var(--pxd-u) var(--pxd-pad-x) var(--pxd-u) calc(var(--pxd-u) * 8);
   border: 0;
@@ -253,7 +253,7 @@
   touch-action: manipulation;
 }
 
-/* Kursor: schodkowa strzałka w prawo, widoczna tylko przy zaznaczonej opcji */
+/* Cursor: stepped right arrow, visible only on the selected option */
 .pxd-choice::before {
   content: "";
   position: absolute;
@@ -282,7 +282,7 @@
   cursor: default;
 }
 
-/* ── Ruch ograniczony na życzenie systemu ──────────────────────────── */
+/* ── Motion reduced at the system's request ────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   .pxd-next {
@@ -291,16 +291,16 @@
 }
 
 /*
- * ŚCIĄGA KLAS
- *   .pxd-layer           warstwa nakładki (--fixed gdy root = body)
- *   .pxd-bubble          chmurka   (--below, --free; stany: .pxd-done, .pxd-wait)
- *     .pxd-name            imię mówiącego
- *     .pxd-text            tekst
- *       .pxd-ch            pojedyncza litera (.pxd-on = odsłonięta)
- *     .pxd-tail            ogonek
- *     .pxd-next            strzałka „dalej”
- *     .pxd-sr              tekst dla czytników ekranu
- *   .pxd-choices         panel wyboru (--bottom-right | --bottom-left | --bottom-center | --center)
- *     .pxd-list            przewijana lista
- *       .pxd-choice          opcja (.pxd-selected, .pxd-disabled)
+ * CLASS CHEAT SHEET
+ *   .pxd-layer           overlay layer (--fixed when root = body)
+ *   .pxd-bubble          bubble (--below, --free; states: .pxd-done, .pxd-wait)
+ *     .pxd-name            speaker name
+ *     .pxd-text            text
+ *       .pxd-ch            single character (.pxd-on = revealed)
+ *     .pxd-tail            tail
+ *     .pxd-next            "next" arrow
+ *     .pxd-sr              screen-reader text
+ *   .pxd-choices         choice panel (--bottom-right | --bottom-left | --bottom-center | --center)
+ *     .pxd-list            scrollable list
+ *       .pxd-choice          option (.pxd-selected, .pxd-disabled)
  */
