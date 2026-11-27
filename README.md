@@ -4,6 +4,20 @@
 
 **JRPG-UI** is a 2D user interface library for JRPG-like browser games.
 
+## Dialogue avatar
+
+Pass an optional image URL to display a portrait to the left of the speaker and text:
+
+```ts
+await showBubble('Hello!', {
+  speaker: 'Jordan',
+  avatar: '/portraits/jordan.png',
+})
+hideBubble()
+```
+
+Without `avatar`, the existing layout is preserved. Failed images are removed while the dialogue remains usable. Portraits use a square crop; override `--jrpg-avatar-size` on `.jrpg-layer` to change the default 64px size. The portrait is decorative for screen readers because the speaker is already announced with the text.
+
 ## Tech Stack
 
 - The codebase is written in **TypeScript**.

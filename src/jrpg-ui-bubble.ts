@@ -28,6 +28,8 @@ export interface BubbleOptions {
   anchor?: Anchor
   /** Speaker name displayed above the text. */
   speaker?: string
+  /** Optional portrait image URL, displayed to the left of the speaker and text. */
+  avatar?: string
   /** Characters per second. 0 / Infinity = instant text. Defaults to configure(). */
   cps?: number
   /**
@@ -168,7 +170,7 @@ function typewrite(
  * hideBubble() or show another bubble.
  */
 export async function showBubble(text: string, options: BubbleOptions = {}): Promise<void> {
-  const { anchor, speaker, signal, onChar } = options
+  const { anchor, speaker, avatar, signal, onChar } = options
   const waitForInput = options.waitForInput ?? true
   const settings = getConfig()
   const cps = options.cps ?? settings.cps
@@ -189,10 +191,27 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
   el.setAttribute('role', 'status')
   if (!anchor) el.classList.add('jrpg-bubble--free')
 
+  let content = el
+  if (avatar) {
+    el.classList.add('jrpg-bubble--avatar')
+    const image = document.createElement('img')
+    image.className = 'jrpg-avatar'
+    image.alt = '' // The speaker is already announced with the dialogue text.
+    image.setAttribute('aria-hidden', 'true')
+    image.draggable = false
+    image.addEventListener('error', () => {
+      image.remove()
+      el.classList.remove('jrpg-bubble--avatar')
+    }, { once: true })
+    image.src = avatar
+    content = div('jrpg-content')
+    el.append(image, content)
+  }
+
   if (speaker) {
     const name = div('jrpg-name', speaker)
     name.setAttribute('aria-hidden', 'true')
-    el.append(name)
+    content.append(name)
   }
 
   const textEl = div('jrpg-text')
@@ -211,7 +230,8 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
 
   const tail = div('jrpg-tail')
   const next = div('jrpg-next')
-  el.append(textEl, sr, tail, next)
+  content.append(textEl)
+  el.append(sr, tail, next)
   layer.append(el)
 
   // The arrow is a scroll hint, so it only appears once typing is done and
@@ -310,6 +330,7 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
     signal?.addEventListener('abort', onAbort, { once: true })
     place()
     ro?.observe(layer)
+    ro?.observe(el)
 
     tw = typewrite(spans, chars, cps, settings.pauses, onChar, () => {
       typing = false

@@ -25,6 +25,26 @@
   padding: var(--jrpg-pad-y) var(--jrpg-pad-x);
 }
 
+/* Optional portrait sits beside the name and scrollable text. */
+.jrpg-bubble--avatar {
+  display: grid;
+  grid-template-columns: minmax(0, var(--jrpg-avatar-size, 64px)) minmax(0, 1fr);
+  gap: var(--jrpg-pad-x);
+  align-items: start;
+}
+
+.jrpg-avatar {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.jrpg-content {
+  min-width: 0;
+}
+
 /* Bubble below the anchor (when it does not fit above it) */
 .jrpg-bubble--below {
   margin: var(--jrpg-gap) 0 0;
