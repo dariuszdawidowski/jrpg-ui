@@ -237,13 +237,17 @@ export async function showBubble(text: string, options: BubbleOptions = {}): Pro
     const h = el.offsetHeight
     const cs = getComputedStyle(layer)
     const padT = parseFloat(cs.paddingTop) || 0
+    const padB = parseFloat(cs.paddingBottom) || 0
     const padL = parseFloat(cs.paddingLeft) || 0
     const padR = parseFloat(cs.paddingRight) || 0
     const gap = parseFloat(getComputedStyle(el).marginBottom) || 0
 
     const below = pt.yTop - h - gap < padT; // does not fit above the anchor → place it below
     el.classList.toggle('jrpg-bubble--below', below)
-    const top = below ? pt.yBottom : pt.yTop - h - gap
+    // Clamp the visible box, including the CSS top margin used below the anchor.
+    const preferredTop = below ? pt.yBottom + gap : pt.yTop - h - gap
+    const top = clamp(preferredTop, padT, Math.max(padT, layer.clientHeight - padB - h))
+      - (below ? gap : 0)
 
     const left = clamp(pt.x - w / 2, padL, Math.max(padL, layer.clientWidth - padR - w))
     const u = tail.offsetWidth || 4
